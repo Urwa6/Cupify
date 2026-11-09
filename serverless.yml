@@ -1,0 +1,9 @@
+service: cupify
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  region: eu-north-1
+  stage: dev

@@ -20,5 +20,9 @@
   "homepage": "https://github.com/Urwa6/Cupify#readme",
   "devDependencies": {
     "serverless": "^4.46.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1164.0",
+    "@aws-sdk/lib-dynamodb": "^3.1164.0"
   }
 }

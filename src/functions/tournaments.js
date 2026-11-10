@@ -29,7 +29,7 @@ exports.getById = async (event) => {
   const { tournamentId } = event.pathParameters;
 
   const tournament = await service.getTournamentById(tournamentId);
-  if (!tournament) return errorResponse(404, "Turneringen finns inte");
+  if (!tournament) return errorResponse(404, "The tournament doesnt exist");
 
   return successResponse(200, tournament);
 };
@@ -37,4 +37,21 @@ exports.getById = async (event) => {
 exports.list = async () => {
   const tournaments = await service.getAllTournaments();
   return successResponse(200, tournaments);
+};
+
+exports.remove = async (event) => {
+  const { tournamentId } = event.pathParameters;
+
+  const tournament = await service.getTournamentById(tournamentId);
+  if (!tournament) return errorResponse(404, "The tournament doesnt exist");
+
+  if (await service.tournamentHasTeamsOrMatches(tournamentId)) {
+    return errorResponse(
+      409,
+      "the tournament has teams or matches and cant be removed",
+    );
+  }
+
+  await service.deleteTournament(tournamentId);
+  return successResponse(200, { message: "The tournament is removed" });
 };

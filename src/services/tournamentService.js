@@ -3,6 +3,7 @@ const {
   GetCommand,
   ScanCommand,
   UpdateCommand,
+  DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
 const { randomUUID } = require("crypto");
 const { dynamoDb } = require("../database/dynamodb");
@@ -56,10 +57,43 @@ const updateTournamentStatus = async (tournamentId, status) => {
     throw err;
   }
 };
+const hasItemsForTournament = async (tableName, tournamentId) => {
+  const result = await dynamoDb.send(
+    new ScanCommand({
+      TableName: tableName,
+      FilterExpression: "tournamentId = :id",
+      ExpressionAttributeValues: { ":id": tournamentId },
+    }),
+  );
+  return result.Items.length > 0;
+};
+
+const tournamentHasTeamsOrMatches = async (tournamentId) => {
+  const hasTeams = await hasItemsForTournament(
+    process.env.TEAMS_TABLE,
+    tournamentId,
+  );
+  const hasMatches = await hasItemsForTournament(
+    process.env.MATCHES_TABLE,
+    tournamentId,
+  );
+  return hasTeams || hasMatches;
+};
+
+const deleteTournament = async (tournamentId) => {
+  await dynamoDb.send(
+    new DeleteCommand({
+      TableName: TABLE,
+      Key: { tournamentId },
+    }),
+  );
+};
 
 module.exports = {
   createTournament,
   getTournamentById,
   getAllTournaments,
   updateTournamentStatus,
+  tournamentHasTeamsOrMatches,
+  deleteTournament,
 };

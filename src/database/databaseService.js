@@ -43,6 +43,17 @@ const queryItems = async (tableName, partitionKey, value) => {
   return result.Items;
 };
 
+// Get all items from a DynamoDB table
+const scanItems = async (tableName) => {
+  const params = {
+    TableName: tableName,
+  };
+
+  const result = await dynamoDb.send(new ScanCommand(params));
+
+  return result.Items;
+};
+
 // Delete an item from a DynamoDB table
 const deleteItem = async (tableName, key) => {
   const params = {
@@ -78,4 +89,4 @@ const updateItem = async (
   return result.Attributes;
 };
 module.exports = {
-  putItem,getItem,queryItems,deleteItem,updateItem,};
+  putItem,getItem,queryItems,scanItems,deleteItem,updateItem,};

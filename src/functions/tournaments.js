@@ -25,3 +25,16 @@ exports.create = async (event) => {
 
   return successResponse(201, tournament);
 };
+exports.getById = async (event) => {
+  const { tournamentId } = event.pathParameters;
+
+  const tournament = await service.getTournamentById(tournamentId);
+  if (!tournament) return errorResponse(404, "Turneringen finns inte");
+
+  return successResponse(200, tournament);
+};
+
+exports.list = async () => {
+  const tournaments = await service.getAllTournaments();
+  return successResponse(200, tournaments);
+};

@@ -85,3 +85,17 @@ resources:
       - httpApi:
           path: /tournaments/{id}/teams
           method: post
+
+  getAllTeams:
+    handler: src/functions/teams.getAllTeamsHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams
+          method: get
+
+  getTeamById:
+    handler: src/functions/teams.getTeamByIdHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams/{teamId}
+          method: get

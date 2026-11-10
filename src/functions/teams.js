@@ -1,4 +1,8 @@
-const { createTeam } = require("../services/teamService");
+const {
+  createTeam,
+  getAllTeams,
+  getTeamById,
+} = require("../services/teamService");
 
 // Lambda handler for creating a new team
 const createTeamHandler = async (event) => {
@@ -70,6 +74,75 @@ const createTeamHandler = async (event) => {
   }
 };
 
+// Lambda handler for getting all teams in a tournament
+const getAllTeamsHandler = async (event) => {
+  try {
+    const tournamentId = event.pathParameters?.id;
+
+    // Get teams from the service
+    const result = await getAllTeams(tournamentId);
+
+    // Handle service errors
+    if (result.error) {
+      return {
+        statusCode: result.statusCode,
+        body: JSON.stringify({ error: result.error }),
+      };
+    }
+
+    // Return the list of teams
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result),
+    };
+  } catch (error) {
+    console.error("Error getting teams:", error);
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Internal server error",
+      }),
+    };
+  }
+};
+
+// Lambda handler for getting a specific team
+const getTeamByIdHandler = async (event) => {
+  try {
+    const tournamentId = event.pathParameters?.id;
+    const teamId = event.pathParameters?.teamId;
+
+    // Get the team from the service
+    const result = await getTeamById(tournamentId, teamId);
+
+    // Handle service errors
+    if (result.error) {
+      return {
+        statusCode: result.statusCode,
+        body: JSON.stringify({ error: result.error }),
+      };
+    }
+
+    // Return the requested team
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result),
+    };
+  } catch (error) {
+    console.error("Error getting team:", error);
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Internal server error",
+      }),
+    };
+  }
+};
+
 module.exports = {
   createTeamHandler,
+  getAllTeamsHandler,
+  getTeamByIdHandler,
 };

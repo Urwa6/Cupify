@@ -2,9 +2,11 @@ const { randomUUID } = require("crypto");
 
 const { getItem, putItem } = require("../database/databaseService");
 
+const TOURNAMENTS_TABLE = process.env.TOURNAMENTS_TABLE;
+const TEAMS_TABLE = process.env.TEAMS_TABLE;
+
 const createTeam = async (tournamentId, teamData) => {
-  // 1. Kontrollera att turneringen finns
-  const tournament = await getItem("Tournaments", {
+  const tournament = await getItem(TOURNAMENTS_TABLE, {
     id: tournamentId,
   });
 
@@ -15,7 +17,6 @@ const createTeam = async (tournamentId, teamData) => {
     };
   }
 
-  // 2. Kontrollera att alla obligatoriska fält finns
   const { name, city, coach } = teamData;
 
   if (
@@ -32,7 +33,6 @@ const createTeam = async (tournamentId, teamData) => {
     };
   }
 
-  // 3. Skapa lagets objekt
   const team = {
     id: randomUUID(),
     tournamentId,
@@ -41,10 +41,8 @@ const createTeam = async (tournamentId, teamData) => {
     coach: coach.trim(),
   };
 
-  // 4. Spara laget i DynamoDB
-  await putItem("Teams", team);
+  await putItem(TEAMS_TABLE, team);
 
-  // 5. Returnera det skapade laget
   return team;
 };
 

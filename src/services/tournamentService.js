@@ -1,4 +1,9 @@
-const { PutCommand, GetCommand, ScanCommand } = require("@aws-sdk/lib-dynamodb");
+const {
+  PutCommand,
+  GetCommand,
+  ScanCommand,
+  UpdateCommand,
+} = require("@aws-sdk/lib-dynamodb");
 const { randomUUID } = require("crypto");
 const { dynamoDb } = require("../database/dynamodb");
 
@@ -19,10 +24,12 @@ const createTournament = async ({ name, sport }) => {
 };
 
 const getTournamentById = async (tournamentId) => {
-  const result = await dynamoDb.send(new GetCommand({
-    TableName: TABLE,
-    Key: { tournamentId },
-  }));
+  const result = await dynamoDb.send(
+    new GetCommand({
+      TableName: TABLE,
+      Key: { tournamentId },
+    }),
+  );
   return result.Item;
 };
 
@@ -30,5 +37,29 @@ const getAllTournaments = async () => {
   const result = await dynamoDb.send(new ScanCommand({ TableName: TABLE }));
   return result.Items;
 };
+const updateTournamentStatus = async (tournamentId, status) => {
+  try {
+    const result = await dynamoDb.send(
+      new UpdateCommand({
+        TableName: TABLE,
+        Key: { tournamentId },
+        UpdateExpression: "SET #s = :s",
+        ConditionExpression: "attribute_exists(tournamentId)",
+        ExpressionAttributeNames: { "#s": "status" },
+        ExpressionAttributeValues: { ":s": status },
+        ReturnValues: "ALL_NEW",
+      }),
+    );
+    return result.Attributes;
+  } catch (err) {
+    if (err.name === "ConditionalCheckFailedException") return null;
+    throw err;
+  }
+};
 
-module.exports = { createTournament, getTournamentById, getAllTournaments };
+module.exports = {
+  createTournament,
+  getTournamentById,
+  getAllTournaments,
+  updateTournamentStatus,
+};

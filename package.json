@@ -1,0 +1,28 @@
+{
+  "name": "cupify",
+  "version": "1.0.0",
+  "description": "REST API for managing sports tournaments, teams and matches.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Urwa6/Cupify.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Urwa6/Cupify/issues"
+  },
+  "homepage": "https://github.com/Urwa6/Cupify#readme",
+  "devDependencies": {
+    "serverless": "^4.46.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1164.0",
+    "@aws-sdk/lib-dynamodb": "^3.1164.0"
+  }
+}

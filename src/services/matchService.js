@@ -246,6 +246,26 @@ const deleteMatch = async (tournamentId, matchId) => {
   return { deleted: true };
 };
 
+// ---------- Used by other parts of the API ----------
+
+// Used by Teams (DELETE team): is the team playing in any match?
+const isTeamInAnyMatch = async (tournamentId, teamId) => {
+  const matches =
+    (await queryItems(MATCHES_TABLE, "tournamentId", tournamentId)) || [];
+
+  return matches.some(
+    (match) => match.homeTeamId === teamId || match.awayTeamId === teamId
+  );
+};
+
+// Used by Tournaments (DELETE tournament): does it have any matches?
+const tournamentHasMatches = async (tournamentId) => {
+  const matches =
+    (await queryItems(MATCHES_TABLE, "tournamentId", tournamentId)) || [];
+
+  return matches.length > 0;
+};
+
 module.exports = {
   getAllMatches,
   getMatchById,
@@ -253,4 +273,6 @@ module.exports = {
   updateMatch,
   registerResult,
   deleteMatch,
+  isTeamInAnyMatch,
+  tournamentHasMatches,
 };

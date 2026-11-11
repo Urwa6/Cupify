@@ -2,9 +2,11 @@ const {
   PutCommand,
   GetCommand,
   ScanCommand,
+  QueryCommand,
   UpdateCommand,
   DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
+
 const { randomUUID } = require("crypto");
 const { dynamoDb } = require("../database/dynamodb");
 
@@ -30,22 +32,38 @@ const getTournamentById = async (tournamentId) => {
   const result = await dynamoDb.send(
     new GetCommand({
       TableName: TABLE,
-      Key: { id:tournamentId },
+      Key: { id: tournamentId },
     }),
   );
   return result.Item;
 };
 
 const getAllTournaments = async () => {
-  const result = await dynamoDb.send(new ScanCommand({ TableName: TABLE }));
-  return result.Items;
+  const tournaments = [];
+  let lastEvaluatedKey;
+
+  do {
+    // Scan the tournaments table
+    const result = await dynamoDb.send(
+      new ScanCommand({
+        TableName: TABLE,
+        ExclusiveStartKey: lastEvaluatedKey,
+      }),
+    );
+
+    tournaments.push(...(result.Items || []));
+    lastEvaluatedKey = result.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
+
+  return tournaments;
 };
+
 const updateTournamentStatus = async (tournamentId, status) => {
   try {
     const result = await dynamoDb.send(
       new UpdateCommand({
         TableName: TABLE,
-        Key: { id:tournamentId },
+        Key: { id: tournamentId },
         UpdateExpression: "SET #s = :s",
         ConditionExpression: "attribute_exists(id)",
         ExpressionAttributeNames: { "#s": "status" },
@@ -59,28 +77,23 @@ const updateTournamentStatus = async (tournamentId, status) => {
     throw err;
   }
 };
+
 const hasItemsForTournament = async (tableName, tournamentId) => {
-  let lastEvaluatedKey;
+  // Check if the tournament has any teams or matches
+  const result = await dynamoDb.send(
+    new QueryCommand({
+      TableName: tableName,
+      KeyConditionExpression: "tournamentId = :id",
+      ExpressionAttributeValues: {
+        ":id": tournamentId,
+      },
+      Limit: 1,
+    }),
+  );
 
-  do {
-    const result = await dynamoDb.send(
-      new ScanCommand({
-        TableName: tableName,
-        FilterExpression: "tournamentId = :id",
-        ExpressionAttributeValues: { ":id": tournamentId },
-        ExclusiveStartKey: lastEvaluatedKey,
-      }),
-    );
-
-    if ((result.Items || []).length > 0) {
-      return true;
-    }
-
-    lastEvaluatedKey = result.LastEvaluatedKey;
-  } while (lastEvaluatedKey);
-
-  return false;
+  return (result.Items || []).length > 0;
 };
+
 const tournamentHasTeamsOrMatches = async (tournamentId) => {
   const hasTeams = await hasItemsForTournament(
     process.env.TEAMS_TABLE,
@@ -97,7 +110,7 @@ const deleteTournament = async (tournamentId) => {
   await dynamoDb.send(
     new DeleteCommand({
       TableName: TABLE,
-      Key: { id:tournamentId },
+      Key: { id: tournamentId },
     }),
   );
 };

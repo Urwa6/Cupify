@@ -10,11 +10,13 @@ const { dynamoDb } = require("../database/dynamodb");
 
 const TABLE = process.env.TOURNAMENTS_TABLE;
 
-const createTournament = async ({ name, sport }) => {
+const createTournament = async ({ name, sport, location, startDate }) => {
   const tournament = {
-    tournamentId: randomUUID(),
+    id: randomUUID(),
     name,
     sport,
+    location,
+    startDate,
     status: "upcoming",
     createdAt: new Date().toISOString(),
   };
@@ -28,7 +30,7 @@ const getTournamentById = async (tournamentId) => {
   const result = await dynamoDb.send(
     new GetCommand({
       TableName: TABLE,
-      Key: { tournamentId },
+      Key: { id:tournamentId },
     }),
   );
   return result.Item;
@@ -43,9 +45,9 @@ const updateTournamentStatus = async (tournamentId, status) => {
     const result = await dynamoDb.send(
       new UpdateCommand({
         TableName: TABLE,
-        Key: { tournamentId },
+        Key: { id:tournamentId },
         UpdateExpression: "SET #s = :s",
-        ConditionExpression: "attribute_exists(tournamentId)",
+        ConditionExpression: "attribute_exists(id)",
         ExpressionAttributeNames: { "#s": "status" },
         ExpressionAttributeValues: { ":s": status },
         ReturnValues: "ALL_NEW",
@@ -58,16 +60,27 @@ const updateTournamentStatus = async (tournamentId, status) => {
   }
 };
 const hasItemsForTournament = async (tableName, tournamentId) => {
-  const result = await dynamoDb.send(
-    new ScanCommand({
-      TableName: tableName,
-      FilterExpression: "tournamentId = :id",
-      ExpressionAttributeValues: { ":id": tournamentId },
-    }),
-  );
-  return result.Items.length > 0;
-};
+  let lastEvaluatedKey;
 
+  do {
+    const result = await dynamoDb.send(
+      new ScanCommand({
+        TableName: tableName,
+        FilterExpression: "tournamentId = :id",
+        ExpressionAttributeValues: { ":id": tournamentId },
+        ExclusiveStartKey: lastEvaluatedKey,
+      }),
+    );
+
+    if ((result.Items || []).length > 0) {
+      return true;
+    }
+
+    lastEvaluatedKey = result.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
+
+  return false;
+};
 const tournamentHasTeamsOrMatches = async (tournamentId) => {
   const hasTeams = await hasItemsForTournament(
     process.env.TEAMS_TABLE,
@@ -84,7 +97,7 @@ const deleteTournament = async (tournamentId) => {
   await dynamoDb.send(
     new DeleteCommand({
       TableName: TABLE,
-      Key: { tournamentId },
+      Key: { id:tournamentId },
     }),
   );
 };

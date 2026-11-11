@@ -1,6 +1,6 @@
 service: cupify
 
-frameworkVersion: '4'
+frameworkVersion: "4"
 
 provider:
   name: aws
@@ -79,6 +79,41 @@ resources:
         BillingMode: PAY_PER_REQUEST
 
 functions:
+  createTeam:
+    handler: src/functions/teams.createTeamHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams
+          method: post
+
+  getAllTeams:
+    handler: src/functions/teams.getAllTeamsHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams
+          method: get
+
+  getTeamById:
+    handler: src/functions/teams.getTeamByIdHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams/{teamId}
+          method: get
+
+  updateTeam:
+    handler: src/functions/teams.updateTeamHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams/{teamId}
+          method: put
+
+  deleteTeam:
+    handler: src/functions/teams.deleteTeamHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams/{teamId}
+          method: delete
+
   # ---------- Matches ----------
   getAllMatches:
     handler: src/functions/matches.getAllMatchesHandler

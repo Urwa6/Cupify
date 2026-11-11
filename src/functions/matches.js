@@ -1,5 +1,5 @@
 const { successResponse, errorResponse } = require("../utils/response");
-const { getAllMatches } = require("../services/matchService");
+const { getAllMatches, getMatchById } = require("../services/matchService");
 
 // Turn a service result into an HTTP response
 const toResponse = (result, successStatus) => {
@@ -26,6 +26,19 @@ const getAllMatchesHandler = async (event) => {
   }
 };
 
+// GET /tournaments/{id}/matches/{matchId}
+const getMatchByIdHandler = async (event) => {
+  try {
+    const tournamentId = event.pathParameters?.id;
+    const matchId = event.pathParameters?.matchId;
+    const result = await getMatchById(tournamentId, matchId);
+    return toResponse(result, 200);
+  } catch (error) {
+    return handleServerError(error);
+  }
+};
+
 module.exports = {
   getAllMatchesHandler,
+  getMatchByIdHandler,
 };

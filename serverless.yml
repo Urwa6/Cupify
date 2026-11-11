@@ -86,3 +86,10 @@ functions:
       - httpApi:
           path: /tournaments/{id}/matches
           method: get
+
+  getMatchById:
+    handler: src/functions/matches.getMatchByIdHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches/{matchId}
+          method: get

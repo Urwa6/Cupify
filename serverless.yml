@@ -93,3 +93,10 @@ functions:
       - httpApi:
           path: /tournaments/{id}/matches/{matchId}
           method: get
+
+  createMatch:
+    handler: src/functions/matches.createMatchHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches
+          method: post

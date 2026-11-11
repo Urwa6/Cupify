@@ -3,6 +3,7 @@ const {
   getAllTeams,
   getTeamById,
   updateTeam,
+  deleteTeam,
 } = require("../services/teamService");
 
 // Lambda handler for creating a new team
@@ -202,9 +203,46 @@ const updateTeamHandler = async (event) => {
   }
 };
 
+// Lambda handler for deleting a team
+const deleteTeamHandler = async (event) => {
+  try {
+    const tournamentId = event.pathParameters?.id;
+    const teamId = event.pathParameters?.teamId;
+
+    // Delete the team using the service
+    const result = await deleteTeam(tournamentId, teamId);
+
+    // Handle service errors
+    if (result.error) {
+      return {
+        statusCode: result.statusCode,
+        body: JSON.stringify({
+          error: result.error,
+        }),
+      };
+    }
+
+    // Return 204 No Content after successful deletion
+    return {
+      statusCode: 204,
+      body: "",
+    };
+  } catch (error) {
+    console.error("Error deleting team:", error);
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Internal server error",
+      }),
+    };
+  }
+};
+
 module.exports = {
   createTeamHandler,
   getAllTeamsHandler,
   getTeamByIdHandler,
   updateTeamHandler,
+  deleteTeamHandler,
 };

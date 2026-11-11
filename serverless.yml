@@ -106,3 +106,10 @@ functions:
       - httpApi:
           path: /tournaments/{id}/teams/{teamId}
           method: put
+
+  deleteTeam:
+    handler: src/functions/teams.deleteTeamHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams/{teamId}
+          method: delete

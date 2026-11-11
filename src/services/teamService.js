@@ -5,10 +5,12 @@ const {
   putItem,
   queryItems,
   updateItem,
+  deleteItem,
 } = require("../database/databaseService");
 
 const TOURNAMENTS_TABLE = process.env.TOURNAMENTS_TABLE;
 const TEAMS_TABLE = process.env.TEAMS_TABLE;
+const MATCHES_TABLE = process.env.MATCHES_TABLE;
 
 // Create a new team in a tournament
 const createTeam = async (tournamentId, teamData) => {
@@ -190,9 +192,61 @@ const updateTeam = async (tournamentId, teamId, teamData) => {
   return updatedTeam;
 };
 
+// Delete a team from a tournament
+const deleteTeam = async (tournamentId, teamId) => {
+  // Check if the tournament exists
+  const tournament = await getItem(TOURNAMENTS_TABLE, {
+    id: tournamentId,
+  });
+
+  if (!tournament) {
+    return {
+      error: "Tournament not found",
+      statusCode: 404,
+    };
+  }
+
+  // Check if the team exists in the tournament
+  const team = await getItem(TEAMS_TABLE, {
+    tournamentId,
+    id: teamId,
+  });
+
+  if (!team) {
+    return {
+      error: "Team not found",
+      statusCode: 404,
+    };
+  }
+
+  // Get all matches in the tournament
+  const matches = await queryItems(MATCHES_TABLE, "tournamentId", tournamentId);
+
+  // Check if the team participates in any match
+  const teamHasMatches = matches.some(
+    (match) => match.homeTeamId === teamId || match.awayTeamId === teamId,
+  );
+
+  if (teamHasMatches) {
+    return {
+      error: "Team cannot be deleted because it participates in a match",
+      statusCode: 409,
+    };
+  }
+
+  // Delete the team from DynamoDB
+  await deleteItem(TEAMS_TABLE, {
+    tournamentId,
+    id: teamId,
+  });
+
+  return { success: true };
+};
+
 module.exports = {
   createTeam,
   getAllTeams,
   getTeamById,
   updateTeam,
+  deleteTeam,
 };

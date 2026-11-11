@@ -77,3 +77,12 @@ resources:
           - AttributeName: id
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
+
+functions:
+  # ---------- Matches ----------
+  getAllMatches:
+    handler: src/functions/matches.getAllMatchesHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches
+          method: get

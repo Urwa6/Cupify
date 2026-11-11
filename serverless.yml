@@ -100,3 +100,10 @@ functions:
       - httpApi:
           path: /tournaments/{id}/matches
           method: post
+
+  updateMatch:
+    handler: src/functions/matches.updateMatchHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches/{matchId}
+          method: put

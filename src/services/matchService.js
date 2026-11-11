@@ -4,6 +4,7 @@ const {
   getItem,
   putItem,
   queryItems,
+  updateItem,
 } = require("../database/databaseService");
 
 const TOURNAMENTS_TABLE = process.env.TOURNAMENTS_TABLE;
@@ -130,8 +131,51 @@ const createMatch = async (tournamentId, matchData) => {
   return match;
 };
 
+// PUT /tournaments/{id}/matches/{matchId}
+const updateMatch = async (tournamentId, matchId, matchData) => {
+  const tournament = await findTournament(tournamentId);
+  if (!tournament) {
+    return { error: "Tournament not found", statusCode: 404 };
+  }
+
+  const match = await findMatch(tournamentId, matchId);
+  if (!match) {
+    return { error: "Match not found", statusCode: 404 };
+  }
+
+  // A completed match cannot be changed
+  if (match.status !== "scheduled") {
+    return {
+      error: "Only scheduled matches can be updated",
+      statusCode: 409,
+    };
+  }
+
+  const validationError = await validateMatchData(tournamentId, matchData);
+  if (validationError) {
+    return validationError;
+  }
+
+  // Only these three fields are updated.
+  // id, tournamentId, status and scores stay the same.
+  const updatedMatch = await updateItem(
+    MATCHES_TABLE,
+    { tournamentId, id: matchId },
+    "SET homeTeamId = :homeTeamId, awayTeamId = :awayTeamId, #date = :date",
+    {
+      ":homeTeamId": matchData.homeTeamId,
+      ":awayTeamId": matchData.awayTeamId,
+      ":date": matchData.date,
+    },
+    { "#date": "date" } // "date" is a reserved word in DynamoDB
+  );
+
+  return updatedMatch;
+};
+
 module.exports = {
   getAllMatches,
   getMatchById,
   createMatch,
+  updateMatch,
 };

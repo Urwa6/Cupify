@@ -3,6 +3,7 @@ const {
   getAllMatches,
   getMatchById,
   createMatch,
+  updateMatch,
 } = require("../services/matchService");
 
 // Read and parse the JSON body.
@@ -78,8 +79,25 @@ const createMatchHandler = async (event) => {
   }
 };
 
+// PUT /tournaments/{id}/matches/{matchId}
+const updateMatchHandler = async (event) => {
+  try {
+    const tournamentId = event.pathParameters?.id;
+    const matchId = event.pathParameters?.matchId;
+
+    const body = parseBody(event);
+    if (body.error) return errorResponse(400, body.error);
+
+    const result = await updateMatch(tournamentId, matchId, body.data);
+    return toResponse(result, 200);
+  } catch (error) {
+    return handleServerError(error);
+  }
+};
+
 module.exports = {
   getAllMatchesHandler,
   getMatchByIdHandler,
   createMatchHandler,
+  updateMatchHandler,
 };

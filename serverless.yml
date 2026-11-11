@@ -113,3 +113,46 @@ functions:
       - httpApi:
           path: /tournaments/{id}/teams/{teamId}
           method: delete
+
+  # ---------- Matches ----------
+  getAllMatches:
+    handler: src/functions/matches.getAllMatchesHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches
+          method: get
+
+  getMatchById:
+    handler: src/functions/matches.getMatchByIdHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches/{matchId}
+          method: get
+
+  createMatch:
+    handler: src/functions/matches.createMatchHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches
+          method: post
+
+  updateMatch:
+    handler: src/functions/matches.updateMatchHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches/{matchId}
+          method: put
+
+  registerMatchResult:
+    handler: src/functions/matches.registerResultHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches/{matchId}/result
+          method: patch
+
+  deleteMatch:
+    handler: src/functions/matches.deleteMatchHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches/{matchId}
+          method: delete

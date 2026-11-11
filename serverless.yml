@@ -107,3 +107,10 @@ functions:
       - httpApi:
           path: /tournaments/{id}/matches/{matchId}
           method: put
+
+  registerMatchResult:
+    handler: src/functions/matches.registerResultHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches/{matchId}/result
+          method: patch

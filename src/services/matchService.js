@@ -19,6 +19,9 @@ const isText = (value) => typeof value === "string" && value.trim() !== "";
 // Check that a value is a valid ISO 8601 date, e.g. "2026-11-20T14:00:00Z"
 const isValidDate = (value) => isText(value) && !isNaN(Date.parse(value));
 
+// Check that a score is a whole number that is 0 or higher
+const isValidScore = (value) => Number.isInteger(value) && value >= 0;
+
 // Get a tournament, or null if it does not exist
 const findTournament = (tournamentId) =>
   getItem(TOURNAMENTS_TABLE, { id: tournamentId });
@@ -173,9 +176,61 @@ const updateMatch = async (tournamentId, matchId, matchData) => {
   return updatedMatch;
 };
 
+// PATCH /tournaments/{id}/matches/{matchId}/result
+const registerResult = async (tournamentId, matchId, resultData) => {
+  const tournament = await findTournament(tournamentId);
+  if (!tournament) {
+    return { error: "Tournament not found", statusCode: 404 };
+  }
+
+  const match = await findMatch(tournamentId, matchId);
+  if (!match) {
+    return { error: "Match not found", statusCode: 404 };
+  }
+
+  const { homeScore, awayScore } = resultData;
+
+  if (homeScore === undefined || awayScore === undefined) {
+    return {
+      error: "homeScore and awayScore are required",
+      statusCode: 400,
+    };
+  }
+
+  if (!isValidScore(homeScore) || !isValidScore(awayScore)) {
+    return {
+      error: "Scores must be whole numbers that are 0 or greater",
+      statusCode: 400,
+    };
+  }
+
+  // A result can only be registered once
+  if (match.status !== "scheduled") {
+    return {
+      error: "The match already has a registered result",
+      statusCode: 409,
+    };
+  }
+
+  const updatedMatch = await updateItem(
+    MATCHES_TABLE,
+    { tournamentId, id: matchId },
+    "SET homeScore = :homeScore, awayScore = :awayScore, #status = :completed",
+    {
+      ":homeScore": homeScore,
+      ":awayScore": awayScore,
+      ":completed": "completed",
+    },
+    { "#status": "status" } // "status" is a reserved word in DynamoDB
+  );
+
+  return updatedMatch;
+};
+
 module.exports = {
   getAllMatches,
   getMatchById,
   createMatch,
   updateMatch,
+  registerResult,
 };

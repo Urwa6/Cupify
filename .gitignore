@@ -147,3 +147,7 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local AWS and Serverless configuration
+config.local.yml
+.aws/

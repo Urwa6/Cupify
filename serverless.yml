@@ -156,3 +156,40 @@ functions:
       - httpApi:
           path: /tournaments/{id}/matches/{matchId}
           method: delete
+
+
+  # ---------- Tournaments ----------
+  createTournament:
+    handler: src/functions/tournaments.create
+    events:
+      - httpApi:
+          path: /tournaments
+          method: post
+
+  getAllTournaments:
+    handler: src/functions/tournaments.list
+    events:
+      - httpApi:
+          path: /tournaments
+          method: get
+
+  getTournamentById:
+    handler: src/functions/tournaments.getById
+    events:
+      - httpApi:
+          path: /tournaments/{tournamentId}
+          method: get
+
+  updateTournamentStatus:
+    handler: src/functions/tournaments.updateStatus
+    events:
+      - httpApi:
+          path: /tournaments/{tournamentId}/status
+          method: patch
+
+  deleteTournament:
+    handler: src/functions/tournaments.remove
+    events:
+      - httpApi:
+          path: /tournaments/{tournamentId}
+          method: delete

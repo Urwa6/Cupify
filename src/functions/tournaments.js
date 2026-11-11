@@ -10,17 +10,23 @@ const parseBody = (event) => {
 };
 
 const isText = (value) => typeof value === "string" && value.trim() !== "";
-const ALLOWED_STATUSES = ["upcoming", "ongoing", "finished"];
+const ALLOWED_STATUSES = ["upcoming", "ongoing", "completed"];
 exports.create = async (event) => {
   const body = parseBody(event);
   if (!body) return errorResponse(400, "Not correct JSON");
 
   if (!isText(body.name)) return errorResponse(400, "name required");
   if (!isText(body.sport)) return errorResponse(400, "sport required");
+  if (!isText(body.location)) return errorResponse(400, "location required");
+  if (!isText(body.startDate) || isNaN(Date.parse(body.startDate))) {
+  return errorResponse(400, "A valid startDate is required");
+}
 
   const tournament = await service.createTournament({
     name: body.name.trim(),
     sport: body.sport.trim(),
+    location: body.location.trim(),
+    startDate: body.startDate,
   });
 
   return successResponse(201, tournament);
@@ -74,5 +80,6 @@ exports.remove = async (event) => {
   }
 
   await service.deleteTournament(tournamentId);
-  return successResponse(200, { message: "The tournament is removed" });
+  return{statusCode: 204,
+      body: "",} ;
 };

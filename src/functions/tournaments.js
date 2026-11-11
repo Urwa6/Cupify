@@ -10,13 +10,13 @@ const parseBody = (event) => {
 };
 
 const isText = (value) => typeof value === "string" && value.trim() !== "";
-
+const ALLOWED_STATUSES = ["upcoming", "ongoing", "finished"];
 exports.create = async (event) => {
   const body = parseBody(event);
-  if (!body) return errorResponse(400, "Ogiltig JSON");
+  if (!body) return errorResponse(400, "Not correct JSON");
 
-  if (!isText(body.name)) return errorResponse(400, "name krävs");
-  if (!isText(body.sport)) return errorResponse(400, "sport krävs");
+  if (!isText(body.name)) return errorResponse(400, "name required");
+  if (!isText(body.sport)) return errorResponse(400, "sport required");
 
   const tournament = await service.createTournament({
     name: body.name.trim(),
@@ -37,6 +37,27 @@ exports.getById = async (event) => {
 exports.list = async () => {
   const tournaments = await service.getAllTournaments();
   return successResponse(200, tournaments);
+};
+exports.updateStatus = async (event) => {
+  const { tournamentId } = event.pathParameters;
+
+  const body = parseBody(event);
+  if (!body) return errorResponse(400, "Invalid JSON");
+
+  if (!ALLOWED_STATUSES.includes(body.status)) {
+    return errorResponse(
+      400,
+      `status must be one of: ${ALLOWED_STATUSES.join(", ")}`,
+    );
+  }
+
+  const tournament = await service.updateTournamentStatus(
+    tournamentId,
+    body.status,
+  );
+  if (!tournament) return errorResponse(404, "Tournament not found");
+
+  return successResponse(200, tournament);
 };
 
 exports.remove = async (event) => {

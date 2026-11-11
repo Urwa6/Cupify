@@ -78,7 +78,7 @@ resources:
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
 
-        functions:
+functions:
   createTeam:
     handler: src/functions/teams.createTeamHandler
     events:
@@ -99,3 +99,10 @@ resources:
       - httpApi:
           path: /tournaments/{id}/teams/{teamId}
           method: get
+
+  updateTeam:
+    handler: src/functions/teams.updateTeamHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/teams/{teamId}
+          method: put

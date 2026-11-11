@@ -2,6 +2,7 @@ const {
   createTeam,
   getAllTeams,
   getTeamById,
+  updateTeam,
 } = require("../services/teamService");
 
 // Lambda handler for creating a new team
@@ -141,8 +142,69 @@ const getTeamByIdHandler = async (event) => {
   }
 };
 
+// Lambda handler for updating an existing team
+const updateTeamHandler = async (event) => {
+  try {
+    const tournamentId = event.pathParameters?.id;
+    const teamId = event.pathParameters?.teamId;
+
+    // Check if the request body exists
+    if (!event.body) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: "Request body is required",
+        }),
+      };
+    }
+
+    // Parse the JSON request body
+    let teamData;
+
+    try {
+      teamData = JSON.parse(event.body);
+    } catch {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: "Invalid JSON",
+        }),
+      };
+    }
+
+    // Update the team using the service
+    const result = await updateTeam(tournamentId, teamId, teamData);
+
+    // Handle service errors
+    if (result.error) {
+      return {
+        statusCode: result.statusCode,
+        body: JSON.stringify({
+          error: result.error,
+        }),
+      };
+    }
+
+    // Return the updated team
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result),
+    };
+  } catch (error) {
+    console.error("Error updating team:", error);
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Internal server error",
+      }),
+    };
+  }
+};
+
 module.exports = {
   createTeamHandler,
   getAllTeamsHandler,
   getTeamByIdHandler,
+  updateTeamHandler,
 };

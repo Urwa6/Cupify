@@ -5,6 +5,7 @@ const {
   putItem,
   queryItems,
   updateItem,
+  deleteItem,
 } = require("../database/databaseService");
 
 const TOURNAMENTS_TABLE = process.env.TOURNAMENTS_TABLE;
@@ -227,10 +228,29 @@ const registerResult = async (tournamentId, matchId, resultData) => {
   return updatedMatch;
 };
 
+// DELETE /tournaments/{id}/matches/{matchId}
+const deleteMatch = async (tournamentId, matchId) => {
+  const tournament = await findTournament(tournamentId);
+  if (!tournament) {
+    return { error: "Tournament not found", statusCode: 404 };
+  }
+
+  const match = await findMatch(tournamentId, matchId);
+  if (!match) {
+    return { error: "Match not found", statusCode: 404 };
+  }
+
+  // Both scheduled and completed matches may be deleted
+  await deleteItem(MATCHES_TABLE, { tournamentId, id: matchId });
+
+  return { deleted: true };
+};
+
 module.exports = {
   getAllMatches,
   getMatchById,
   createMatch,
   updateMatch,
   registerResult,
+  deleteMatch,
 };

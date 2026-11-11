@@ -5,6 +5,7 @@ const {
   createMatch,
   updateMatch,
   registerResult,
+  deleteMatch,
 } = require("../services/matchService");
 
 // Read and parse the JSON body.
@@ -112,10 +113,29 @@ const registerResultHandler = async (event) => {
   }
 };
 
+// DELETE /tournaments/{id}/matches/{matchId}
+const deleteMatchHandler = async (event) => {
+  try {
+    const tournamentId = event.pathParameters?.id;
+    const matchId = event.pathParameters?.matchId;
+
+    const result = await deleteMatch(tournamentId, matchId);
+    if (result.error) {
+      return errorResponse(result.statusCode, result.error);
+    }
+
+    // 204 No Content = no response body
+    return { statusCode: 204 };
+  } catch (error) {
+    return handleServerError(error);
+  }
+};
+
 module.exports = {
   getAllMatchesHandler,
   getMatchByIdHandler,
   createMatchHandler,
   updateMatchHandler,
   registerResultHandler,
+  deleteMatchHandler,
 };

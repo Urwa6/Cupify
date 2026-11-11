@@ -114,3 +114,10 @@ functions:
       - httpApi:
           path: /tournaments/{id}/matches/{matchId}/result
           method: patch
+
+  deleteMatch:
+    handler: src/functions/matches.deleteMatchHandler
+    events:
+      - httpApi:
+          path: /tournaments/{id}/matches/{matchId}
+          method: delete

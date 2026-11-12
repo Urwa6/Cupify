@@ -1,3 +1,7 @@
+const {
+  isNonEmptyString,
+} = require("../utils/validation");
+
 const { randomUUID } = require("crypto");
 
 const {
@@ -27,7 +31,7 @@ const createTeam = async (tournamentId, teamData) => {
   }
 
   // Validate required team fields
-  const { name, city, coach } = teamData;
+ /* const { name, city, coach } = teamData;
 
   if (
     typeof name !== "string" ||
@@ -42,6 +46,20 @@ const createTeam = async (tournamentId, teamData) => {
       statusCode: 400,
     };
   }
+  */
+
+  const { name, city, coach } = teamData;
+
+if (
+  !isNonEmptyString(name) ||
+  !isNonEmptyString(city) ||
+  !isNonEmptyString(coach)
+) {
+  return {
+    error: "Name, city and coach are required",
+    statusCode: 400,
+  };
+}
 
   // Create a new team object with a unique ID
   const team = {

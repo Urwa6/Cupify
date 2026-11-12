@@ -31,22 +31,7 @@ const createTeam = async (tournamentId, teamData) => {
   }
 
   // Validate required team fields
- /* const { name, city, coach } = teamData;
 
-  if (
-    typeof name !== "string" ||
-    !name.trim() ||
-    typeof city !== "string" ||
-    !city.trim() ||
-    typeof coach !== "string" ||
-    !coach.trim()
-  ) {
-    return {
-      error: "Name, city and coach are required",
-      statusCode: 400,
-    };
-  }
-  */
 
   const { name, city, coach } = teamData;
 
@@ -165,19 +150,17 @@ const updateTeam = async (tournamentId, teamId, teamData) => {
   const { name, city, coach } = teamData;
 
   // Validate required fields
-  if (
-    typeof name !== "string" ||
-    !name.trim() ||
-    typeof city !== "string" ||
-    !city.trim() ||
-    typeof coach !== "string" ||
-    !coach.trim()
-  ) {
-    return {
-      error: "Name, city and coach are required",
-      statusCode: 400,
-    };
-  }
+  
+ if (
+  !isNonEmptyString(name) ||
+  !isNonEmptyString(city) ||
+  !isNonEmptyString(coach)
+) {
+  return {
+    error: "Name, city and coach are required",
+    statusCode: 400,
+  };
+}
 
   // Prevent changes to the team's identifiers
   if (

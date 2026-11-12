@@ -13,14 +13,14 @@ const isText = (value) => typeof value === "string" && value.trim() !== "";
 const ALLOWED_STATUSES = ["upcoming", "ongoing", "completed"];
 exports.create = async (event) => {
   const body = parseBody(event);
-  if (!body) return errorResponse(400, "Not correct JSON");
+  if (!body) return errorResponse(400, "Invalid JSON");
 
-  if (!isText(body.name)) return errorResponse(400, "name required");
-  if (!isText(body.sport)) return errorResponse(400, "sport required");
-  if (!isText(body.location)) return errorResponse(400, "location required");
+  if (!isText(body.name)) return errorResponse(400, "name is required");
+  if (!isText(body.sport)) return errorResponse(400, "sport is required");
+  if (!isText(body.location)) return errorResponse(400, "location is required");
   if (!isText(body.startDate) || isNaN(Date.parse(body.startDate))) {
-  return errorResponse(400, "A valid startDate is required");
-}
+    return errorResponse(400, "startDate must be a valid date");
+  }
 
   const tournament = await service.createTournament({
     name: body.name.trim(),
@@ -35,7 +35,7 @@ exports.getById = async (event) => {
   const { tournamentId } = event.pathParameters;
 
   const tournament = await service.getTournamentById(tournamentId);
-  if (!tournament) return errorResponse(404, "The tournament doesnt exist");
+  if (!tournament) return errorResponse(404, "Tournament not found");
 
   return successResponse(200, tournament);
 };
@@ -70,16 +70,15 @@ exports.remove = async (event) => {
   const { tournamentId } = event.pathParameters;
 
   const tournament = await service.getTournamentById(tournamentId);
-  if (!tournament) return errorResponse(404, "The tournament doesnt exist");
+  if (!tournament) return errorResponse(404, "Tournament not found");
 
   if (await service.tournamentHasTeamsOrMatches(tournamentId)) {
     return errorResponse(
       409,
-      "the tournament has teams or matches and cant be removed",
+      "Tournament has teams or matches and cannot be deleted",
     );
   }
 
   await service.deleteTournament(tournamentId);
-  return{statusCode: 204,
-      body: "",} ;
+  return { statusCode: 204, body: "" };
 };

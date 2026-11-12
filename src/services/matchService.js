@@ -1,3 +1,9 @@
+const {
+  isNonEmptyString,
+  isValidDate,
+  isValidScore,
+} = require("../utils/validation");
+
 const { randomUUID } = require("crypto");
 
 const {
@@ -12,16 +18,6 @@ const TOURNAMENTS_TABLE = process.env.TOURNAMENTS_TABLE;
 const TEAMS_TABLE = process.env.TEAMS_TABLE;
 const MATCHES_TABLE = process.env.MATCHES_TABLE;
 
-// ---------- Helpers ----------
-
-// Check that a value is a non-empty string
-const isText = (value) => typeof value === "string" && value.trim() !== "";
-
-// Check that a value is a valid ISO 8601 date, e.g. "2026-11-20T14:00:00Z"
-const isValidDate = (value) => isText(value) && !isNaN(Date.parse(value));
-
-// Check that a score is a whole number that is 0 or higher
-const isValidScore = (value) => Number.isInteger(value) && value >= 0;
 
 // Get a tournament, or null if it does not exist
 const findTournament = (tournamentId) =>
@@ -36,7 +32,11 @@ const findMatch = (tournamentId, matchId) =>
 const validateMatchData = async (tournamentId, matchData) => {
   const { homeTeamId, awayTeamId, date } = matchData;
 
-  if (!isText(homeTeamId) || !isText(awayTeamId) || !isText(date)) {
+if (
+  !isNonEmptyString(homeTeamId) ||
+  !isNonEmptyString(awayTeamId) ||
+  !isNonEmptyString(date)
+) {
     return {
       error: "homeTeamId, awayTeamId and date are required",
       statusCode: 400,

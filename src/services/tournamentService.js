@@ -1,4 +1,10 @@
 const {
+  isNonEmptyString,
+  isValidDate,
+  isAllowedTournamentStatus,
+} = require("../utils/validation");
+
+const {
   PutCommand,
   GetCommand,
   ScanCommand,
@@ -13,6 +19,18 @@ const { dynamoDb } = require("../database/dynamodb");
 const TABLE = process.env.TOURNAMENTS_TABLE;
 
 const createTournament = async ({ name, sport, location, startDate }) => {
+  if (
+    !isNonEmptyString(name) ||
+    !isNonEmptyString(sport) ||
+    !isNonEmptyString(location) ||
+    !isValidDate(startDate)
+  ) {
+    return {
+      error: "Invalid tournament data",
+      statusCode: 400,
+    };
+  }
+
   const tournament = {
     id: randomUUID(),
     name,
@@ -59,6 +77,13 @@ const getAllTournaments = async () => {
 };
 
 const updateTournamentStatus = async (tournamentId, status) => {
+  if (!isAllowedTournamentStatus(status)) {
+    return {
+      error: "Invalid tournament status",
+      statusCode: 400,
+    };
+  }
+
   try {
     const result = await dynamoDb.send(
       new UpdateCommand({

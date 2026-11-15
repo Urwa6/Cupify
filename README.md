@@ -107,7 +107,8 @@ The following tests have been performed successfully against the personal AWS de
 
 ### Business Rules Verified
 
-The following business rules havch | Creates a match with scheduled status | Passed – HTTP 201 |
+The following business rules have been tested against the personal AWS deployment.
+| Creates a match with scheduled status | Passed – HTTP 201 |
 | Retrieve matches | Returns matches belonging to a tournament | Passed – HTTP 200 |
 | Retrieve individual match | Returns the requested match | Passed – HTTP 200 |
 | Update scheduled match | Updates scheduled match information | Passed – HTTP 200 |
